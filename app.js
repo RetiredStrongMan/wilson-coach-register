@@ -24,16 +24,49 @@ async function api(action,data={},bearer=token) {
   return out;
 }
 function remember(s){token=s.token;expires=s.expiresAt*1000;}
-async function login(){remember(await api("login",device,publicKey));}
-async function authorized(action,data) {
-  if(!token || Date.now()+30000>=expires) await login();
-  try {return await api(action,data);}catch(e){if(e.status!==401) throw e; await login();return api(action,data);}
+function requireAccount(version) {
+  if(version!==generation) throw Error("账号已切换。");
 }
+async function login(version=generation){
+  const session=await api("login",device,publicKey);
+  requireAccount(version);
+  remember(session);
+}
+async function authorized(action,data) {
+  const version=generation;
+  if(!token || Date.now()+30000>=expires) await login(version);
+  requireAccount(version);
+  try {return await api(action,data);}catch(e){if(e.status!==401) throw e; requireAccount(version); await login(version);return api(action,data);}
+}
+function clearChat() {
+  pending=null;
+  el("answer").textContent="";
+  el("answer").hidden=true;
+  el("question").value="";
+}
+let generation=0;
+function deactivatePage() {
+  generation++;
+  clearChat();
+  token=null;
+  expires=0;
+  el("account").hidden=true;
+}
+window.addEventListener("pagehide",deactivatePage);
+window.addEventListener("pageshow",event=>{if(event.persisted) location.reload();});
+window.addEventListener("storage",event=>{
+  if(!native && (event.key===null || event.key==="coach.pass.device")) {
+    deactivatePage();
+    location.reload();
+  }
+});
 function activation(message){
-  token=null; el("account").hidden=true; el("access").hidden=false; note(message);
+  deactivatePage(); el("account").hidden=true; el("access").hidden=false; note(message);
 }
 async function quota() {
+  const version=generation;
   const {quota:q,available,models=[]}=await authorized("quota");
+  requireAccount(version);
   const selector=el("model");
   for(const option of selector.options) option.disabled=!models.includes(option.value);
   if(!models.includes(selector.value) && models.length) selector.value=models[0];
@@ -46,7 +79,7 @@ async function quota() {
   if(!available) note("设备已激活。共享模型待管理员启用。");else if(!remaining) note("今日额度已用完。");
 }
 async function restore() {
-  el("retry").hidden=true;note("正在检查设备…");
+  deactivatePage();el("retry").hidden=true;note("正在检查设备…");
   try {device=await storageDevice(); if(!device){activation("");return;} await login();note("");await quota();}
   catch(e){if(e.status===401){activation("请输入尚未使用的邀请码。");}else{note("暂时无法验证设备，请重新连接。");el("retry").hidden=false;}}
 }
@@ -82,10 +115,11 @@ if(native) el("return").hidden=false;
 el("ask").onsubmit=async e=>{
   e.preventDefault();const question=el("question").value.trim();if(!question||el("send").disabled)return;
   const model=el("model").value;
+  const accountGeneration=generation;
   if(!pending||pending.question!==question||pending.model!==model)pending={requestId:crypto.randomUUID(),question,model};
   el("send").disabled=true;note("教练正在分析…");
-  try{const out=await authorized("ask",pending);el("answer").textContent=out.answer;el("answer").hidden=false;pending=null;el("question").value="";note("");}
-  catch(e){if(e.retrySame===false)pending=null;note(e.message);}
-  finally{try{await quota();}catch{el("retry").hidden=false;}}
+  try{const out=await authorized("ask",pending);if(accountGeneration!==generation)return;el("answer").textContent=out.answer;el("answer").hidden=false;pending=null;el("question").value="";note("");}
+  catch(e){if(accountGeneration!==generation)return;if(e.retrySame===false)pending=null;note(e.message);}
+  finally{if(accountGeneration===generation){try{await quota();}catch{el("retry").hidden=false;}}}
 };
 el("retry").onclick=restore;restore();
