@@ -33,7 +33,10 @@ function activation(message){
   token=null; el("account").hidden=true; el("access").hidden=false; note(message);
 }
 async function quota() {
-  const {quota:q,available}=await authorized("quota");
+  const {quota:q,available,models=[]}=await authorized("quota");
+  const selector=el("model");
+  for(const option of selector.options) option.disabled=!models.includes(option.value);
+  if(!models.includes(selector.value) && models.length) selector.value=models[0];
   if(!q){activation("此设备的共享权限已撤销。如需继续，请输入新的邀请码。");return;}
   el("access").hidden=true;el("account").hidden=false;
   const remaining=Math.max(0,q.limit-q.used);
@@ -78,9 +81,10 @@ el("activate").onsubmit=async e=>{
 if(native) el("return").hidden=false;
 el("ask").onsubmit=async e=>{
   e.preventDefault();const question=el("question").value.trim();if(!question||el("send").disabled)return;
-  if(!pending||pending.question!==question)pending={requestId:crypto.randomUUID(),question};
+  const model=el("model").value;
+  if(!pending||pending.question!==question||pending.model!==model)pending={requestId:crypto.randomUUID(),question,model};
   el("send").disabled=true;note("教练正在分析…");
-  try{const out=await authorized("ask",pending);el("answer").textContent=out.answer;el("answer").hidden=false;pending=null;el("ask").reset();note("");}
+  try{const out=await authorized("ask",pending);el("answer").textContent=out.answer;el("answer").hidden=false;pending=null;el("question").value="";note("");}
   catch(e){if(e.retrySame===false)pending=null;note(e.message);}
   finally{try{await quota();}catch{el("retry").hidden=false;}}
 };

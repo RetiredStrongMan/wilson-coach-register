@@ -5,5 +5,5 @@
 <section id="access" hidden><h1>激活共享教练</h1><form id="activate"><label>一次性邀请码<input id="code" required autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="粘贴 Wilson 发给你的邀请码"></label>
 <small>激活后邀请码立即失效。下次用同一客户端或浏览器打开即可继续使用。</small><button id="redeem">激活此设备</button></form></section>
 <section id="account" hidden><h1>共享教练</h1><section id="meter"><h2>今日剩余额度</h2><p><b id="remaining"></b> 次 / <span id="limit"></span> 次</p><progress id="bar" aria-label="剩余提问次数"></progress><p id="reset"></p></section>
-<form id="ask"><label>训练问题<textarea id="question" maxlength="2000" rows="4" required></textarea></label><small>你输入的文字会发送给 AI 服务。成功回答后计 1 次。</small><button id="send">问教练</button></form><article id="answer" hidden></article></section>
+<form id="ask"><label>教练模型<select id="model"><option value="gpt-6.2-sol">GPT-6.2 Sol</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5</option></select></label><label>训练问题<textarea id="question" maxlength="2000" rows="4" required></textarea></label><small>你输入的文字会发送给 AI 服务。成功回答后计 1 次。</small><button id="send">问教练</button></form><article id="answer" hidden></article></section>
 <p id="state" role="status" aria-live="polite">正在检查设备…</p><button id="retry" type="button" hidden>重新连接</button></main></body></html>
