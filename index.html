@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://zstdtbqqrxaaqjuxpjtk.supabase.co; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>骑友账号 · Wilson AI Coach</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head>
+<body><main><header><img src="favicon.svg" alt="" width="40" height="40"><strong>Wilson AI Coach</strong></header>
+<section id="access"><h1>骑友账号</h1><nav aria-label="账号操作"><button id="signin" type="button" aria-pressed="true">登录</button><button id="signup" type="button" aria-pressed="false">注册</button></nav>
+<form id="auth"><label>邮箱<input type="email" id="email" autocomplete="email" maxlength="254" required></label><label>密码<input type="password" id="password" autocomplete="current-password" maxlength="128" required></label>
+<label id="invited" hidden>专属邀请码<input id="invite" autocomplete="off" maxlength="64"><small>使用邀请时登记的邮箱，密码至少 12 位。</small></label><button id="submit">登录</button></form></section>
+<section id="account" hidden><div class="row"><h1>共享教练</h1><button id="logout" type="button">退出</button></div><p id="identity"></p><section id="meter" hidden><h2>今日剩余额度</h2><p><b id="remaining"></b> 次 / <span id="limit"></span> 次</p><progress id="bar"></progress><p id="reset"></p></section>
+<form id="activate" hidden><label>专属邀请码<input id="code" minlength="64" maxlength="64" required></label><button>激活共享额度</button></form>
+<form id="ask" hidden><label>训练问题<textarea id="question" maxlength="2000" rows="4" required></textarea></label><small>你输入的文字会发送给 AI 服务。成功回答后计 1 次。</small><button id="send">问教练</button></form><article id="answer" hidden></article></section>
+<p id="state" role="status" aria-live="polite"></p></main></body></html>
